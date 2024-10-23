@@ -7,10 +7,27 @@ use Illuminate\Http\Request;
 
 class ProductController extends Controller
 {
-    // Fetch all products
-    public function index()
+    // Fetch all products with optional search and category filter
+    public function index(Request $request)
     {
-        $products = Product::all();
+        // Initialize a query on the Product model
+        $query = Product::query();
+
+        // Check if a search term is provided
+        if ($request->has('search') && $request->search !== '') {
+            $searchTerm = $request->search;
+            $query->where('description', 'like', '%' . $searchTerm . '%'); // Search by description
+        }
+
+        // Check if a category is provided
+        if ($request->has('category') && $request->category !== '') {
+            $category = $request->category;
+            $query->where('category', $category); // Filter by category
+        }
+
+        // Get the filtered products
+        $products = $query->get();
+
         return response()->json($products);
     }
 
